@@ -1,0 +1,251 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz - Coming Soon</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      font-family: "Segoe UI", sans-serif;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 30px;
+      border: 2px solid #00ffc3;
+      border-radius: 12px;
+      background: rgba(20, 20, 20, 0.8);
+      box-shadow: 0 0 20px rgba(0, 255, 195, 0.2);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #00ffc3;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #bbb;
+    }
+
+    .countdown {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #ff4081;
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      width: 100%;
+      background: #222;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 12px;
+      margin: 15px 0;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: #00ffc3;
+      transition: width 1s linear;
+    }
+
+    .nav-links {
+      margin-top: 25px;
+    }
+
+    .nav-links a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #00ffc3;
+      font-weight: bold;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Quiz</h1>
+    <p>Get ready to test your coding knowledge…</p>
+    <div class="countdown" id="countdown">Starting in 5</div>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p><em>Coming Soon</em></p>
+
+    <div class="nav-links">
+      <a href="layout.html">🔲 Layout Practice</a>
+      <a href="games.html">🎮 Games</a>
+      <a href="about.html">👥 About Us</a>
+    </div>
+  </div>
+
+  <script>
+    // Countdown animation
+    let count = 5;
+    const countdownEl = document.getElementById('countdown');
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateCountdown() {
+      countdownEl.textContent = "Starting in " + count;
+      progressBar.style.width = ((5 - count) / 5) * 100 + "%";
+      count--;
+      if (count < 0) {
+        countdownEl.textContent = "🚀 Coming Soon!";
+        progressBar.style.width = "100%";
+      } else {
+        setTimeout(updateCountdown, 1000);
+      }
+    }
+
+    updateCountdown();
+  </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz - Coming Soon</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #4f46e5;
+      --accent: #7c3aed;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--dark);
+      font-family: "Segoe UI", sans-serif;
+      color: var(--light);
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 30px;
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.95);
+      box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--secondary);
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: var(--gray);
+    }
+
+    .countdown {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--warning);
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      width: 100%;
+      background: #222;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 12px;
+      margin: 15px 0;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: var(--secondary);
+      transition: width 1s linear;
+    }
+
+    .nav-links {
+      margin-top: 25px;
+    }
+
+    .nav-links a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: var(--secondary);
+      font-weight: bold;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Quiz</h1>
+    <p>Get ready to test your coding knowledge…</p>
+    <div class="countdown" id="countdown">Starting in 5</div>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p><em>Coming Soon</em></p>
+
+    <div class="nav-links">
+      <a href="layout.html">🔲 Layout Practice</a>
+      <a href="games.html">🎮 Games</a>
+      <a href="about.html">👥 About Us</a>
+    </div>
+  </div>
+
+  <script>
+    // Countdown animation
+    let count = 5;
+    const countdownEl = document.getElementById('countdown');
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateCountdown() {
+      countdownEl.textContent = "Starting in " + count;
+      progressBar.style.width = ((5 - count) / 5) * 100 + "%";
+      count--;
+      if (count < 0) {
+        countdownEl.textContent = "🚀 Coming Soon!";
+        progressBar.style.width = "100%";
+      } else {
+        setTimeout(updateCountdown, 1000);
+      }
+    }
+
+    updateCountdown();
+  </script>
+</body>
+</html>

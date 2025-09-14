@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enhanced Layout Grouping Demo</title>
+    <style>
+        :root {
+            --toolbox-blue: #0077cc;
+            --accent: #ff6600;
+            --dark-bg: #0b1220;
+            --success: #28a745;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            background: #f3f4f6;
+            color: #333;
+        }
+        
+        .left {
+            flex: 2;
+            padding: 12px;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        #preview {
+            flex: 1;
+            border: 2px dashed #cbd5e1;
+            background: #fff center/contain no-repeat;
+            position: relative;
+            overflow: hidden;
+            min-height: 360px;
+        }
+        
+        .right {
+            width: 340px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f9fafb;
+            border-left: 1px solid #e5e7eb;
+        }
+        
+        .toolbox {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .box {
+            width: 80px;
+            height: 56px;
+            border: 2px solid var(--toolbox-blue);
+            border-radius: 8px;
+            background: rgba(0, 119, 204, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            user-select: none;
+            font-size: 13px;
+            transition: transform 0.1s ease;
+        }
+        
+        .toolbox .box:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        
+        /* Custom file input */
+        .file-input-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .custom-file-upload {
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .custom-file-upload:hover {
+            background: #f8f9fa;
+            border-color: #cbd5e1;
+        }
+        
+        .custom-file-upload i {
+            margin-right: 5px;
+        }
+        
+        #upload {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* Dropped boxes */
+        .drop-box {
+            position: absolute;
+            border: 2px dashed var(--accent);
+            background: rgba(255, 165, 0, 0.1);
+            min-width: 24px;
+            min-height: 24px;
+            box-sizing: border-box;
+            overflow: visible;
+            touch-action: none;
+            transition: border-color 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .drop-box:hover {
+            border-color: #0077cc;
+        }
+        
+        .drop-box .remove-btn {
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 0;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #333;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .drop-box .remove-btn:hover {
+            transform: scale(1.1);
+            background: #ff4d4d;
+            color: white;
+        }
+        
+        .drop-box .class-name {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .resize-handle {
+            width: 12px;
+            height: 12px;
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            cursor: se-resize;
+            border-radius: 2px;
+            background: linear-gradient(135deg, #fff, #eee);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            z-index: 5;
+        }
+        
+        .help {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.4;
+        }
+        
+        button {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background: #f8f9fa;
+        }
+        
+        button.primary {
+            background: var(--toolbox-blue);
+            color: #fff;
+            border-color: transparent;
+        }
+        
+        button.primary:hover {
+            background: #0066b3;
+        }
+        
+        pre#output {
+            background: var(--dark-bg);
+            color: #9ef08a;
+            padding: 12px;
+            border-radius: 6px;
+            max-height: 260px;
+            overflow: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .success-message {
+            color: var(--success);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left">
+    <div class="controls">
+        <div class="file-input-container">
+            <label for="upload" class="custom-file-upload">
+                📁 Choose Image
+            </label>
+            <input id="upload" type="file" accept="image/*">
+        </div>
+        
+        <button id="clear-all" title="Remove all boxes and clear storage">Clear Layout</button>
+        
+        <div style="flex: 1"></div>
+        
+        <div class="help">
+            Instructions: Drag toolbox boxes onto the image to create groups. 
+            Drag box body to move. Drag bottom-right handle to resize. 
+            Click on a box to rename its class.
+        </div>
+    </div>
+
+    <div id="preview" aria-label="Canvas preview (drop area)"></div>
+</div>
+
+<div class="right">
+    <h3 style="margin: 0 0 10px 0;">Toolbox</h3>
+    <div class="toolbox">
+        <div class="box" draggable="true" data-w="80" data-h="56">Small</div>
+        <div class="box" draggable="true" data-w="120" data-h="72" style="width:120px;height:72px;">Medium</div>
+        <div class="box" draggable="true" data-w="180" data-h="110" style="width:180px;height:110px;">Large</div>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center; margin-top: 15px;">
+        <button id="show-structure" class="primary">Show HTML Structure</button>
+        <button id="copy-structure">Copy</button>
+        <div style="flex:1"></div>
+        <button id="download-state">Download JSON</button>
+    </div>
+
+    <pre id="output" readonly><!-- html structure appears here --></pre>
+    
+    <div class="success-message" id="copy-success">Copied to clipboard!</div>
+</div>
+
+<div class="modal" id="rename-modal">
+    <div class="modal-content">
+        <h3>Rename Box Class</h3>
+        <input type="text" class="modal-input" id="class-name-input" placeholder="Enter class name">
+        <div class="modal-buttons">
+            <button id="cancel-rename">Cancel</button>
+            <button id="confirm-rename" class="primary">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Layout Demo with nesting, move/resize separation, and localStorage persistence
+const preview = document.getElementById('preview');
+const upload = document.getElementById('upload');
+const showStructureBtn = document.getElementById('show-structure');
+const outputPre = document.getElementById('output');
+const copyBtn = document.getElementById('copy-structure');
+const clearAllBtn = document.getElementById('clear-all');
+const downloadBtn = document.getElementById('download-state');
+const renameModal = document.getElementById('rename-modal');
+const classNameInput = document.getElementById('class-name-input');
+const confirmRenameBtn = document.getElementById('confirm-rename');
+const cancelRenameBtn = document.getElementById('cancel-rename');
+const copySuccess = document.getElementById('copy-success');
+
+let boxesState = []; // array of {id, parentId, left, top, width, height, z, className}
+let currentRenamingBox = null;
+
+// Keys used in localStorage
+const LS_IMAGE_KEY = 'layout_demo_image';
+const LS_BOXES_KEY = 'layout_demo_boxes';
+
+function uid() {
+    return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// Restore image & boxes on load
+function restoreFromStorage() {
+    const dataURL = localStorage.getItem(LS_IMAGE_KEY);
+    if (dataURL) preview.style.backgroundImage = `url(${dataURL})`;
+    
+    const boxesJSON = localStorage.getItem(LS_BOXES_KEY);
+    boxesState = boxesJSON ? JSON.parse(boxesJSON) : [];
+    
+    // Ensure each box has a className property for backward compatibility
+    boxesState.forEach(box => {
+        if (!box.className) box.className = '';
+    });
+    
+    renderAllBoxes();
+}
+
+// Save to localStorage
+function saveBoxes() {
+    localStorage.setItem(LS_BOXES_KEY, JSON.stringify(boxesState));
+}
+
+// Upload image handler
+upload.addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+        preview.style.backgroundImage = `url(${reader.result})`;
+        localStorage.setItem(LS_IMAGE_KEY, reader.result);
+    };
+    reader.readAsDataURL(f);
+});
+
+// Toolbox dragstart
+document.querySelectorAll('.toolbox .box').forEach(b => {
+    b.addEventListener('dragstart', (e) => {
+        const w = parseInt(b.dataset.w) || b.offsetWidth;
+        const h = parseInt(b.dataset.h) || b.offsetHeight;
+        e.dataTransfer.setData('application/x-layout-box', JSON.stringify({w, h}));
+        e.dataTransfer.effectAllowed = 'copy';
+    });
+});
+
+// Allow drop on preview
+preview.addEventListener('dragover', (e) => e.preventDefault());
+preview.addEventListener('drop', (e) => {
+    // Only handle drops directly on the preview, not on boxes inside it
+    if (e.target !== preview) return;
+    handleDrop(e, preview);
+
+    showStructure();
+});
+
+function handleDrop(e, containerEl) {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent event from bubbling up
+    
+    const raw = e.dataTransfer.getData('application/x-layout-box');
+    if (!raw) return;
+    
+    const template = JSON.parse(raw);
+    const w = template.w;
+    const h = template.h;
+
+    const rect = containerEl.getBoundingClientRect();
+    const left = Math.max(0, Math.round(e.clientX - rect.left - w/2));
+    const top = Math.max(0, Math.round(e.clientY - rect.top - h/2));
+
+    const id = uid();
+    const parentId = containerEl === preview ? null : containerEl.dataset.id || null;
+
+    const newBox = { 
+        id, 
+        parentId, 
+        left, 
+        top, 
+        width: w, 
+        height: h, 
+        z: nextZIndex(),
+        className: '' 
+    };
+    
+    boxesState.push(newBox);
+    saveBoxes();
+    const el = createBoxElement(newBox);
+    containerEl.appendChild(el);
+
+    showStructure();
+}
+
+function nextZIndex() {
+    return boxesState.length ? (Math.max(...boxesState.map(b => b.z || 0)) + 1) : 1;
+}
+
+function createBoxElement(boxObj) {
+    const el = document.createElement('div');
+    el.className = 'drop-box';
+    el.dataset.id = boxObj.id;
+    el.dataset.parentId = boxObj.parentId || '';
+    el.style.left = boxObj.left + 'px';
+    el.style.top = boxObj.top + 'px';
+    el.style.width = boxObj.width + 'px';
+    el.style.height = boxObj.height + 'px';
+    el.style.zIndex = boxObj.z || '';
+
+    // Class name display
+    const classNameDisplay = document.createElement('div');
+    classNameDisplay.className = 'class-name';
+    classNameDisplay.textContent = boxObj.className || 'Unnamed';
+    el.appendChild(classNameDisplay);
+
+    // Remove button
+    const rm = document.createElement('button');
+    rm.className = 'remove-btn';
+    rm.title = 'Remove box';
+    rm.innerText = '×';
+    rm.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        removeBox(boxObj.id);
+    });
+    el.appendChild(rm);
+
+    // Resize handle
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    el.appendChild(handle);
+
+    // Drop listeners for nested creation
+    el.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    
+    el.addEventListener('drop', (e) => {
+        handleDrop(e, el);
+        e.stopPropagation(); // Stop event from bubbling to parent containers
+    });
+
+    // Click to rename class (on the box body, not on controls)
+    el.addEventListener('click', (e) => {
+        // Only trigger rename if clicking on the box body, not on controls
+        if (e.target !== classNameDisplay && 
+            e.target !== rm && 
+            e.target !== handle) {
+            return;
+        }
+        
+        // If clicking on controls, don't show rename modal
+        if (e.target === rm || e.target === handle || e.target === el) return;
+        
+            
+        
+        e.stopPropagation();
+        showRenameModal(boxObj.id);
+    });
+
+    // Interactive move + resize
+    makeInteractive(el, boxObj);
+
+    return el;
+}
+
+function makeInteractive(el, boxObj) {
+    let dragging = false;
+    let resizing = false;
+    let startX = 0, startY = 0, startLeft = 0, startTop = 0, startW = 0, startH = 0;
+    const handle = el.querySelector('.resize-handle');
+
+    function onMouseDown(e) {
+        // Stop propagation to prevent parent elements from receiving the event
+        e.stopPropagation();
+        
+        if (e.target === handle) {
+            resizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startW = el.offsetWidth;
+            startH = el.offsetHeight;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            e.preventDefault();
+            return;
+        }
+        
+        if (e.target.classList.contains('remove-btn')) return;
+        
+        dragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseFloat(el.style.left || 0);
+        startTop = parseFloat(el.style.top || 0);
+        el.style.zIndex = nextZIndex();
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        e.preventDefault();
+    }
+
+    function onMouseMove(e) {
+        // Stop propagation to prevent parent elements from receiving the event
+        e.stopPropagation();
+        
+        if (resizing) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const newW = Math.max(24, Math.round(startW + dx));
+            const newH = Math.max(24, Math.round(startH + dy));
+            el.style.width = newW + 'px';
+            el.style.height = newH + 'px';
+            
+            const obj = findBox(boxObj.id);
+            if (obj) {
+                obj.width = newW;
+                obj.height = newH;
+            }
+            return;
+        }
+        
+        if (dragging) {
+            const parentRect = el.parentElement.getBoundingClientRect();
+            const newLeft = Math.round(startLeft + (e.clientX - startX));
+            const newTop = Math.round(startTop + (e.clientY - startY));
+            
+            const maxLeft = parentRect.width - el.offsetWidth;
+            const maxTop = parentRect.height - el.offsetHeight;
+            
+            el.style.left = Math.min(Math.max(0, newLeft), Math.max(0, maxLeft)) + 'px';
+            el.style.top = Math.min(Math.max(0, newTop), Math.max(0, maxTop)) + 'px';
+            
+            const obj = findBox(boxObj.id);
+            if (obj) {
+                obj.left = parseInt(el.style.left);
+                obj.top = parseInt(el.style.top);
+            }
+            return;
+        }
+    }
+
+    function onMouseUp(e) {
+        // Stop propagation to prevent parent elements from receiving the event
+        e.stopPropagation();
+        
+        if (resizing || dragging) {
+            const obj = findBox(boxObj.id);
+            if (obj) {
+                obj.left = parseInt(el.style.left) || 0;
+                obj.top = parseInt(el.style.top) || 0;
+                obj.width = parseInt(el.style.width) || el.offsetWidth;
+                obj.height = parseInt(el.style.height) || el.offsetHeight;
+                obj.z = parseInt(el.style.zIndex) || obj.z || 1;
+            }
+            saveBoxes();
+        }
+        
+        dragging = false;
+        resizing = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    el.addEventListener('mousedown', onMouseDown);
+    el.addEventListener('dragstart', (e) => e.preventDefault());
+}
+
+function findBox(id) {
+    return boxesState.find(b => b.id === id);
+}
+
+function removeBox(id) {
+    const idsToRemove = collectDescendants(id).concat([id]);
+    boxesState = boxesState.filter(b => !idsToRemove.includes(b.id));
+    saveBoxes();
+    renderAllBoxes();
+}
+
+function collectDescendants(parentId) {
+    const children = boxesState.filter(b => b.parentId === parentId).map(b => b.id);
+    return children.reduce((acc, childId) => 
+        acc.concat(childId, collectDescendants(childId)), []);
+}
+
+function renderAllBoxes() {
+    preview.querySelectorAll('.drop-box').forEach(n => n.remove());
+
+    const mapChildren = {};
+    boxesState.forEach(b => {
+        (mapChildren[b.parentId || 'root'] = mapChildren[b.parentId || 'root'] || []).push(b);
+    });
+
+    function renderInto(container, parentId) {
+        const list = mapChildren[parentId || 'root'] || [];
+        list.forEach(obj => {
+            const el = createBoxElement(obj);
+            container.appendChild(el);
+            renderInto(el, obj.id);
+        });
+    }
+
+    renderInto(preview, null);
+}
+
+function showRenameModal(boxId) {
+    currentRenamingBox = boxId;
+    const box = findBox(boxId);
+    classNameInput.value = box.className || '';
+    renameModal.style.display = 'flex';
+    classNameInput.focus();
+}
+
+function hideRenameModal() {
+    renameModal.style.display = 'none';
+    currentRenamingBox = null;
+}
+
+confirmRenameBtn.addEventListener('click', () => {
+    if (currentRenamingBox) {
+        const box = findBox(currentRenamingBox);
+        if (box) {
+            box.className = classNameInput.value.trim();
+            saveBoxes();
+            renderAllBoxes();
+        }
+    }
+    hideRenameModal();
+
+    showStructure();
+
+});
+
+cancelRenameBtn.addEventListener('click', hideRenameModal);
+
+// Close modal when clicking outside
+renameModal.addEventListener('click', (e) => {
+    if (e.target === renameModal) hideRenameModal();
+});
+
+// Build HTML structure
+function buildHTMLStructure() {
+    const byId = new Map(boxesState.map(b => [b.id, Object.assign({}, b)]));
+    const rootChildren = [];
+    
+    boxesState.forEach(b => {
+        if (b.parentId) {
+            const parent = byId.get(b.parentId);
+            if (parent) {
+                parent.children = parent.children || [];
+                parent.children.push(byId.get(b.id));
+            } else {
+                rootChildren.push(byId.get(b.id));
+            }
+        } else {
+            rootChildren.push(byId.get(b.id));
+        }
+    });
+
+    let counter = 0;
+    function assignNames(node) {
+        node._cls = node.className || 'box-' + (++counter);
+        (node.children || []).forEach(assignNames);
+    }
+    
+    rootChildren.forEach(assignNames);
+
+    function renderNode(node, indent = 2) {
+        const pad = ' '.repeat(indent);
+        let s = `${pad}<div class="${node._cls}">\n`;
+        (node.children || []).forEach(child => s += renderNode(child, indent + 2));
+        s += `${pad}</div>\n`;
+        return s;
+    }
+
+    let out = `<div class="container">\n`;
+    rootChildren.forEach(n => out += renderNode(n, 2));
+    out += `</div>`;
+    return out;
+}
+
+showStructureBtn.addEventListener('click', () => {
+    showStructure();
+});
+
+function showStructure(){
+    const html = buildHTMLStructure();
+    outputPre.textContent = html;
+}
+
+copyBtn.addEventListener('click', async () => {
+    const txt = outputPre.textContent || buildHTMLStructure();
+    try {
+        await navigator.clipboard.writeText(txt);
+        copySuccess.style.display = 'block';
+        setTimeout(() => {
+            copySuccess.style.display = 'none';
+        }, 2000);
+    } catch (e) {
+        alert('Copy failed — select & copy manually.');
+    }
+});
+
+clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Remove all boxes and clear saved layout?')) return;
+    boxesState = [];
+    saveBoxes();
+    localStorage.removeItem(LS_IMAGE_KEY);
+    localStorage.removeItem(LS_BOXES_KEY);
+    preview.style.backgroundImage = '';
+    renderAllBoxes();
+});
+
+downloadBtn.addEventListener('click', () => {
+    const payload = {
+        image: localStorage.getItem(LS_IMAGE_KEY) || null,
+        boxes: boxesState
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'layout-demo-state.json';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+window.addEventListener('load', restoreFromStorage);
+window.addEventListener('beforeunload', () => {
+    saveBoxes();
+});
+</script>
+</body>
+</html>
